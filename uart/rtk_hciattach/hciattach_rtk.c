@@ -44,7 +44,7 @@
 #include "hciattach.h"
 #include "hciattach_h4.h"
 
-#define RTK_VERSION "3.1.2c27de6.20220110-123628"
+#define RTK_VERSION "3.1.8bea77d.20220330-143428"
 
 #define TIMESTAMP_PR
 
@@ -613,8 +613,11 @@ static void h5_init_hci_cc(struct sk_buff *skb)
 
 	case HCI_VENDOR_READ_CHIP_TYPE:
 		rtb_cfg.chip_type = (skb->data[1] & 0x0f);
+		rtb_cfg.chip_ver = (skb->data[2] & 0x0f);
 		RS_INFO("Read chip type %02x", rtb_cfg.chip_type);
+		RS_INFO("Read chip ver %02x", rtb_cfg.chip_ver);
 		break;
+
 	default:
 		return;
 	}
@@ -1649,7 +1652,7 @@ void rtb_read_chip_type(int dd)
 {
 	/* 0xB000A094 */
 	unsigned char cmd_buff[] = {
-		0x61, 0xfc, 0x05, 0x10, 0xa6, 0xa0, 0x00, 0xb0
+		0x61, 0xfc, 0x05, 0x10, 0xA6, 0xAD, 0x00, 0xB0
 	};
 	struct sk_buff *nskb;
 	int result;
@@ -1815,6 +1818,19 @@ static int rtb_config(int fd, int proto, int speed, struct termios *ti)
 	case ROM_LMP_8703b:
 		rtb_read_chip_type(fd);
 		break;
+	case ROM_LMP_8852a:
+		rtb_read_chip_type(fd);
+		break;
+	}
+
+	if((rtb_cfg.chip_type == CHIP_8852BPE_VR) || (rtb_cfg.chip_type == CHIP_8852BPS)) {
+		rtb_cfg.chip_type = CHIP_8852BP;
+		RS_INFO("chip_type: %d", rtb_cfg.chip_type);
+	}
+
+	if(rtb_cfg.chip_type == CHIP_8852BP) {
+		rtb_cfg.eversion = rtb_cfg.chip_ver;
+		RS_INFO("eversion: %d", rtb_cfg.eversion);
 	}
 
 	rtb_cfg.patch_ent = get_patch_entry(&rtb_cfg);
@@ -1883,8 +1899,11 @@ static int rtb_config(int fd, int proto, int speed, struct termios *ti)
 	case CHIP_8852AS:
 	case CHIP_8723FS:
 	case CHIP_8852BS:
-	case CHIP_8852CS:
+	case CHIP_8852BP:
 		max_patch_size = 40 * 1024 + 529;
+		break;
+	case CHIP_8852CS:
+		max_patch_size = 76 * 1024 + 529;
 		break;
 	default:
 		max_patch_size = 24 * 1024;

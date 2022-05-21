@@ -54,7 +54,7 @@
 #include "rtk_coex.h"
 #endif
 
-#define VERSION "2.2.fdfa5dd.20220110-123627"
+#define VERSION "2.2.3634cd9.20220330-143427"
 
 #if HCI_VERSION_CODE > KERNEL_VERSION(3, 4, 0)
 #define GET_DRV_DATA(x)		hci_get_drvdata(x)
@@ -1025,7 +1025,11 @@ static void hci_uart_tty_wakeup(struct tty_struct *tty)
  * Return Value:    None
  */
 static void hci_uart_tty_receive(struct tty_struct *tty, const u8 * data,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 14, 0)
+				 const char *flags, int count)
+#else
 				 char *flags, int count)
+#endif
 {
 	struct hci_uart *hu = (void *)tty->disc_data;
 	int (*proto_receive)(struct hci_uart *hu, void *data, int len);
@@ -1270,7 +1274,11 @@ static int hci_uart_tty_ioctl(struct tty_struct *tty, struct file *file,
 		return hu->hdev_flags;
 
 	default:
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 0)
+		err = n_tty_ioctl_helper(tty, cmd, arg);
+#else
 		err = n_tty_ioctl_helper(tty, file, cmd, arg);
+#endif
 		break;
 	};
 
@@ -1308,7 +1316,12 @@ static unsigned int hci_uart_tty_poll(struct tty_struct *tty,
 
 static struct tty_ldisc_ops hci_uart_ldisc = {
 	.owner          = THIS_MODULE,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 14, 0)
+	.num		= N_HCI,
+#endif
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 13, 0)
 	.magic          = TTY_LDISC_MAGIC,
+#endif
 	.name           = "n_hci",
 	.open           = hci_uart_tty_open,
 	.close          = hci_uart_tty_close,
@@ -1330,7 +1343,11 @@ static int __init hci_uart_init(void)
 	BT_INFO("HCI UART driver ver %s", VERSION);
 
 	/* Register the tty discipline */
+#if HCI_VERSION_CODE >= KERNEL_VERSION(5, 14, 0)
+	if ((err = tty_register_ldisc(&hci_uart_ldisc))) {
+#else
 	if ((err = tty_register_ldisc(N_HCI, &hci_uart_ldisc))) {
+#endif
 		BT_ERR("HCI line discipline registration failed. (%d)", err);
 		return err;
 	}
@@ -1349,16 +1366,22 @@ static int __init hci_uart_init(void)
 
 static void __exit hci_uart_exit(void)
 {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 14, 0)
 	int err;
+#endif
 
 #ifdef CONFIG_BT_HCIUART_H4
 	h4_deinit();
 #endif
 	h5_deinit();
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 14, 0)
+	tty_unregister_ldisc(&hci_uart_ldisc);
+#else
 	/* Release tty registration of line discipline */
 	if ((err = tty_unregister_ldisc(N_HCI)))
 		BT_ERR("Can't unregister HCI line discipline (%d)", err);
+#endif
 
 #ifdef BTCOEX
 	rtk_btcoex_exit();

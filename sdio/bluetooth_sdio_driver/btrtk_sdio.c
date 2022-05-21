@@ -39,7 +39,7 @@
 
 #include "btrtl.h"
 
-#define VERSION "0.12.b93043a.20220110-123625"
+#define VERSION "0.12.b93043a.20220330-143424"
 
 #define BTSDIO_DMA_ALIGN		8
 

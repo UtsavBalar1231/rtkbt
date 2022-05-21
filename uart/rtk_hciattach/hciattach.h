@@ -150,6 +150,7 @@ typedef struct rtb_struct {
 	uint8_t hci_ver;
 	uint8_t eversion;
 	uint8_t chip_type;
+	uint8_t chip_ver;
 
 	uint32_t vendor_baud;
 	uint8_t dl_fw_flag;

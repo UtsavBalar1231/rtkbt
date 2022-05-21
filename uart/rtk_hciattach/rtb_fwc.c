@@ -104,6 +104,15 @@ uint16_t project_id[]=
 	ROM_LMP_NONE,
 	ROM_LMP_NONE,
 	ROM_LMP_8852a, /* id 25 for 8852CS */
+	ROM_LMP_NONE,
+	ROM_LMP_NONE,
+	ROM_LMP_NONE,
+	ROM_LMP_NONE,
+	ROM_LMP_NONE,
+	ROM_LMP_NONE,
+	ROM_LMP_NONE,
+	ROM_LMP_NONE,
+	ROM_LMP_8852a, /* id 34 for 8852BP */
 };
 
 static struct patch_info h4_patch_table[] = {
@@ -188,12 +197,17 @@ static struct patch_info patch_table[] = {
 		"rtl8852as_fw", "rtl8852as_config", "RTL8852AS" },
 
 	/* RTL8852BS */
-	{ RTL_FW_MATCH_HCI_REV, CHIP_8852BS,
+	{ RTL_FW_MATCH_CHIP_TYPE | RTL_FW_MATCH_HCI_VER | RTL_FW_MATCH_HCI_REV, CHIP_8852BS,
 		ROM_LMP_8852a, ROM_LMP_8852a, 11, 0x000b,
 		"rtl8852bs_fw", "rtl8852bs_config", "RTL8852BS" },
 
+	/* RTL8852BP */
+	{ RTL_FW_MATCH_CHIP_TYPE | RTL_FW_MATCH_HCI_VER | RTL_FW_MATCH_HCI_REV, CHIP_8852BP,
+		ROM_LMP_8852a, ROM_LMP_8852a, 11, 0x000b,
+		"rtl8852bps_fw", "rtl8852bps_config", "RTL8852BP" },
+
 	/* RTL8852CS */
-	{ RTL_FW_MATCH_HCI_REV, CHIP_8852CS,
+	{ RTL_FW_MATCH_CHIP_TYPE | RTL_FW_MATCH_HCI_VER | RTL_FW_MATCH_HCI_REV, CHIP_8852CS,
 		ROM_LMP_8852a, ROM_LMP_8852a, 11, 0x000c,
 		"rtl8852cs_fw", "rtl8852cs_config", "RTL8852CS" },
 
@@ -514,7 +528,7 @@ static int is_mac(uint8_t chip_type, uint16_t offset)
 		if (offset == 0x0030)
 			return 1;
 		break;
-	case 0: /* special for not setting chip_type */
+//	case 0: /* special for not setting chip_type */
 	case CHIP_8761AT:
 	case CHIP_8761ATF:
 	case CHIP_8761BTC:
@@ -543,7 +557,7 @@ static uint16_t get_mac_offset(uint8_t chip_type)
 	case CHIP_8852BS:
 	case CHIP_8852CS:
 		return 0x0030;
-	case 0: /* special for not setting chip_type */
+//	case 0: /* special for not setting chip_type */
 	case CHIP_8761AT:
 	case CHIP_8761ATF:
 	case CHIP_8761BTC:

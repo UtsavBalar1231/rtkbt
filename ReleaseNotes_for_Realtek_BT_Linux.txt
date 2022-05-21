@@ -1,4 +1,9 @@
 Release History:
+	20220330:
+		1. update the firmware file for RTL8723D and RTL8852A
+		2. rtk_btusb: fine-tune the code for Coverity defect
+		3. add support for RTL8821DU
+		4. support for Linux Kernel 5.16
 	20220110:
 		1. update the firmware files for RTL8852B, RTL8723F, RTL8761B, RTL8822C
 		2. add pid for RTL8852BE, RTL8852CE, RTL8851AU, RTL8851ASA
@@ -51,7 +56,7 @@ Hardware Supported:
 	All Realtek Bluetooth Chip.
 
 Platform Supported:
-	Linux kernel V2.6.32-5.10.6
+	Linux kernel V2.6.32-5.16.13
 
 CPU supported:
 	ARM/MIPS/X86
